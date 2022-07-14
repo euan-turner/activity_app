@@ -1,0 +1,5 @@
+#Ignore trials
+stuff/
+
+#Ignore planning
+planning.txt
