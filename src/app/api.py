@@ -57,10 +57,23 @@ def save_data(data, activity_id : str, suffix : str):
     with open(output_file, "wb") as of:
         of.write(data)
 
+def api_setup(username : str, password : str):
+    """Initialises the API instance for a user
+
+    Args:
+        username (str): 
+        password (str): 
+
+    Returns:
+        Garmin: Garmin API instance from garminconnect
+    """    
+    api = Garmin(username, password)
+    api.login()
+    return api
 
 
-api = Garmin("euanoturner@gmail.com", "C@nbera1")
-api.login()
+
+api = api_setup("euanoturner@gmail.com", "C@nbera1")
 activities = api.get_activities_by_date('2022-05-02', '2022-05-02', 'running')
 for activity in activities:
     activity_id = activity["activityId"]
