@@ -18,31 +18,39 @@ def get_csv_data(api : Garmin, activity_id : str):
     csv_data = api.download_activity(activity_id, dl_fmt = api.ActivityDownloadFormat.CSV)
     return csv_data
 
-def get_gpx_data(api : Garmin, activity_id : str):
+def get_gpx_data(api : Garmin, activity_id : str, as_string : bool = False):
     """Gets the gpx data for an activity from Garmin Connect API
 
     Args:
         api (Garmin): API instance from garminconnect
         activity_id (str): Activity ID
+        as_string (bool): Whether bytes-type should be converted to string-type
 
     Returns:
-        str: Activity data in gpx (XML) format
+        bytes (or str): Activity data in gpx (XML) format
     """    
     gpx_data = api.download_activity(activity_id, dl_fmt = api.ActivityDownloadFormat.GPX)
-    return gpx_data.decode(encoding = 'utf-8')
+    if as_string:
+        return gpx_data.decode(encoding = 'utf-8')
+    else:
+        return gpx_data
 
-def get_tcx_data(api : Garmin, activity_id : str):
+def get_tcx_data(api : Garmin, activity_id : str, as_string : bool = False):
     """Gets the tcx data for an activity from Garmin Connect API
 
     Args:
         api (Garmin): API instance from garminconnect
         activity_id (str): Activity ID
+        as_string (bool): Whether bytes-type should be converted to string-type
 
     Returns:
-        str: Activity data in tcx (XML) format
+        bytes (or str): Activity data in tcx (XML) format
     """    
     tcx_data = api.download_activity(activity_id, dl_fmt = api.ActivityDownloadFormat.TCX)
-    return tcx_data.decode(encoding = 'utf-8')
+    if as_string:
+        return tcx_data.decode(encoding = 'utf-8')
+    else:
+        return tcx_data
 
 def save_data(data, activity_id : str, suffix : str):  
     """Saves activity data to a file
@@ -77,6 +85,10 @@ api = api_setup("euanoturner@gmail.com", "C@nbera1")
 activities = api.get_activities_by_date('2022-05-02', '2022-05-02', 'running')
 for activity in activities:
     activity_id = activity["activityId"]
-    data = get_tcx_data(api, activity_id)
-    print(data)
+    tcx = get_tcx_data(api, activity_id)
+    save_data(tcx, activity_id, 'tcx')
+    gpx = get_gpx_data(api, activity_id)
+    save_data(gpx, activity_id, 'gpx')
+    csv = get_csv_data(api, activity_id)
+    save_data(csv, activity_id, 'csv')
 
