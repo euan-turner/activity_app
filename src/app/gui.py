@@ -1,12 +1,25 @@
 import sys
 from PyQt6.QtWidgets import (
-    QWidget, QApplication, QMainWindow, QLineEdit, QPushButton, QLabel, QVBoxLayout, QHBoxLayout)
+    QWidget, QApplication, QMainWindow, QLineEdit, QPushButton, QLabel, QMessageBox, QVBoxLayout, QHBoxLayout)
 from PyQt6.QtCore import Qt 
 
-class LogInWindow(QMainWindow):
+from api import API
 
-    def __init__(self):
+class LogInWindow(QMainWindow):
+    """Runs the log-in window
+    Inherits from QMainWindow
+    Sets the Garmin connection for an API instance after authentication
+    """    
+
+    def __init__(self, api : API):
+        """
+
+        Args:
+            api (API): Stores garminconnect API instance for external access
+        """        
         super().__init__()
+
+        self.api = api
 
         self.setWindowTitle("Garmin Buddy")
 
@@ -59,18 +72,35 @@ class LogInWindow(QMainWindow):
         self.setCentralWidget(widget)
     
     def submit_entries(self):
+        """Slot for submit button signal
+        Validates login and runs dialogs
+        """        
         email = self.email_entry.text()
         password = self.pass_entry.text()
-        print(email, password)
+        success = self.api.setup(email, password)
+        if success:
+            dialog = QMessageBox(self)
+            dialog.setWindowTitle("Login")
+            dialog.setText("Login successful")
+            dialog.exec()
+        else:
+            dialog = QMessageBox(self)
+            dialog.setWindowTitle("Login")
+            dialog.setText("Login unsuccessful\nInvalid details")
+            dialog.exec()
+            self.clear_entries()
     
     def clear_entries(self):
+        """Slot for clear button signal
+        """        
         self.email_entry.clear()
         self.pass_entry.clear()
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = LogInWindow()
+    api = API()
+    window = LogInWindow(api)
     window.show()
     app.exec()
 
