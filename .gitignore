@@ -1,5 +1,8 @@
 #Ignore trials
 stuff/
 
+##Ignore binaries
+__pycache__/
+
 #Ignore planning
 planning.txt
