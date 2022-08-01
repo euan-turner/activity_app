@@ -9,20 +9,21 @@ from garminconnect import (
 class API():
 
     def setup(self, username : str, password : str):
-        """Initialises the API instance for a user
+        """Initialises the garmin connect API instance and logs in
 
         Args:
-            username (str): 
-            password (str): 
+            username (str): Given username, typically email
+            password (str): Given password, in plaintext
 
         Returns:
-            Garmin: Garmin API instance from garminconnect
-        """    
+            bool: Login success
+        """        
         try:
             self.garmin = Garmin(username, password)
-            self.garmin.login()
-        except GarminConnectAuthenticationError as e:
-            return e
+            result = self.garmin.login()
+            return True
+        except GarminConnectAuthenticationError:
+            return False
 
     def get_csv_data(self, activity_id : str):
         """Gets the csv data for an activity from Garmin Connect API
