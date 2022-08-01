@@ -5,90 +5,93 @@ from garminconnect import (
     GarminConnectTooManyRequestsError,
 )
 
-def get_csv_data(api : Garmin, activity_id : str):
-    """Gets the csv data for an activity from Garmin Connect API
 
-    Args:
-        api (Garmin): API instance from garminconnect
-        activity_id (str): Activity ID
+class API():
 
-    Returns:
-        str: Activity data in csv format
-    """    
-    csv_data = api.download_activity(activity_id, dl_fmt = api.ActivityDownloadFormat.CSV)
-    return csv_data
+    def setup(self, username : str, password : str):
+        """Initialises the API instance for a user
 
-def get_gpx_data(api : Garmin, activity_id : str, as_string : bool = False):
-    """Gets the gpx data for an activity from Garmin Connect API
+        Args:
+            username (str): 
+            password (str): 
 
-    Args:
-        api (Garmin): API instance from garminconnect
-        activity_id (str): Activity ID
-        as_string (bool): Whether bytes-type should be converted to string-type
+        Returns:
+            Garmin: Garmin API instance from garminconnect
+        """    
+        try:
+            self.garmin = Garmin(username, password)
+            self.garmin.login()
+        except GarminConnectAuthenticationError as e:
+            return e
 
-    Returns:
-        bytes (or str): Activity data in gpx (XML) format
-    """    
-    gpx_data = api.download_activity(activity_id, dl_fmt = api.ActivityDownloadFormat.GPX)
-    if as_string:
-        return gpx_data.decode(encoding = 'utf-8')
-    else:
-        return gpx_data
+    def get_csv_data(self, activity_id : str):
+        """Gets the csv data for an activity from Garmin Connect API
 
-def get_tcx_data(api : Garmin, activity_id : str, as_string : bool = False):
-    """Gets the tcx data for an activity from Garmin Connect API
+        Args:
+            activity_id (str): Activity ID
 
-    Args:
-        api (Garmin): API instance from garminconnect
-        activity_id (str): Activity ID
-        as_string (bool): Whether bytes-type should be converted to string-type
+        Returns:
+            str: Activity data in csv format
+        """    
+        csv_data = self.garmin.download_activity(activity_id, dl_fmt = self.garmin.ActivityDownloadFormat.CSV)
+        return csv_data
 
-    Returns:
-        bytes (or str): Activity data in tcx (XML) format
-    """    
-    tcx_data = api.download_activity(activity_id, dl_fmt = api.ActivityDownloadFormat.TCX)
-    if as_string:
-        return tcx_data.decode(encoding = 'utf-8')
-    else:
-        return tcx_data
+    def get_gpx_data(self, activity_id : str, as_string : bool = False):
+        """Gets the gpx data for an activity from Garmin Connect API
 
-def save_data(data, activity_id : str, suffix : str):  
-    """Saves activity data to a file
-    May not be needed if data can be processed within the program
+        Args:
+            activity_id (str): Activity ID
+            as_string (bool): Whether bytes-type should be converted to string-type
 
-    Args:
-        data (): Data from garmin connect
-        activity_id (str): Activity ID
-        suffix (str): filetype suffix
-    """     
-    output_file = f"./src/app/activity_files/{str(activity_id)}.{suffix}"
-    with open(output_file, "wb") as of:
-        of.write(data)
+        Returns:
+            bytes (or str): Activity data in gpx (XML) format
+        """    
+        gpx_data = self.garmin.download_activity(activity_id, dl_fmt = self.garmin.ActivityDownloadFormat.GPX)
+        if as_string:
+            return gpx_data.decode(encoding = 'utf-8')
+        else:
+            return gpx_data
 
-def api_setup(username : str, password : str):
-    """Initialises the API instance for a user
+    def get_tcx_data(self, activity_id : str, as_string : bool = False):
+        """Gets the tcx data for an activity from Garmin Connect API
 
-    Args:
-        username (str): 
-        password (str): 
+        Args:
+            activity_id (str): Activity ID
+            as_string (bool): Whether bytes-type should be converted to string-type
 
-    Returns:
-        Garmin: Garmin API instance from garminconnect
-    """    
-    api = Garmin(username, password)
-    api.login()
-    return api
+        Returns:
+            bytes (or str): Activity data in tcx (XML) format
+        """    
+        tcx_data = self.garmin.download_activity(activity_id, dl_fmt = self.garmin.ActivityDownloadFormat.TCX)
+        if as_string:
+            return tcx_data.decode(encoding = 'utf-8')
+        else:
+            return tcx_data
+
+    def save_data(self, data, activity_id : str, suffix : str):  
+        """Saves activity data to a file
+        May not be needed if data can be processed within the program
+
+        Args:
+            data (): Data from garmin connect
+            activity_id (str): Activity ID
+            suffix (str): filetype suffix
+        """     
+        output_file = f"./src/app/activity_files/{str(activity_id)}.{suffix}"
+        with open(output_file, "wb") as of:
+            of.write(data)
 
 
-
-api = api_setup("euanoturner@gmail.com", "C@nbera1")
-activities = api.get_activities_by_date('2022-05-02', '2022-05-02', 'running')
-for activity in activities:
-    activity_id = activity["activityId"]
-    tcx = get_tcx_data(api, activity_id)
-    save_data(tcx, activity_id, 'tcx')
-    gpx = get_gpx_data(api, activity_id)
-    save_data(gpx, activity_id, 'gpx')
-    csv = get_csv_data(api, activity_id)
-    save_data(csv, activity_id, 'csv')
+if __name__ == "__main__":
+    api = API()
+    api.setup("euanoturner@gmail.com", "C@nbera1")
+    activities = api.garmin.get_activities_by_date('2022-05-02', '2022-05-02', 'running')
+    for activity in activities:
+        activity_id = activity["activityId"]
+        tcx = api.get_tcx_data(activity_id)
+        api.save_data(tcx, activity_id, 'tcx')
+        gpx = api.get_gpx_data(activity_id)
+        api.save_data(gpx, activity_id, 'gpx')
+        csv = api.get_csv_data(activity_id)
+        api.save_data(csv, activity_id, 'csv')
 

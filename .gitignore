@@ -1,6 +1,9 @@
 #Ignore trials
 stuff/
 
+#Ignore data files
+activity_files/
+
 ##Ignore binaries
 __pycache__/
 
