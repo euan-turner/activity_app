@@ -6,8 +6,9 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from api import api_setup, get_gpx_data
 
 class MapWidget(QWidget):
-
-    def __init__(self, filename):
+    """Loads a folium map of gpx file onto a widget
+    """    
+    def __init__(self, gpx_data : io.BytesIO):
         super().__init__()
 
         ##Default layout
@@ -22,15 +23,15 @@ class MapWidget(QWidget):
         }
 
         ##Create folium map with gpxplotter
-        map = create_folium_map(tiles = "stamenterrain")
-        for track in read_gpx_file(filename):
+        route_map = create_folium_map(tiles = "stamenterrain")
+        for track in read_gpx_file(gpx_data):
             print(track)
             for _, segment in enumerate(track['segments']):
-                add_segment_to_map(map, segment, line_options = line_options)
+                add_segment_to_map(route_map, segment, line_options = line_options)
         
         ##Save map to bytes
         data = io.BytesIO()
-        map.save(data, close_file = False)
+        route_map.save(data, close_file = False)
 
         ##Load map onto widget
         webView = QWebEngineView()
