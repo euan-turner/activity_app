@@ -4,7 +4,7 @@ from garminconnect import (
     GarminConnectAuthenticationError,
     GarminConnectTooManyRequestsError,
 )
-
+from datetime import datetime
 
 class API():
 
@@ -24,6 +24,25 @@ class API():
             return True
         except GarminConnectAuthenticationError:
             return False
+    
+    def get_activities_by_date(self, start_date : datetime, end_date : datetime, activity_type : str = "running"):
+        """Retrieves multiple activities within a date range from Garmin API
+
+        Args:
+            start_date (datetime): Start of date range
+            end_date (datetime): End of date range
+            activity_type (str, optional): Activity type in garmin. Defaults to "running".
+
+        Returns:
+            list: JSON descriptions of activities within range
+        """        
+        ##Strip text format of date
+        start = start_date.strftime("%Y-%m-%d")
+        end = end_date.strftime("%Y-%m-%d")
+        activities = self.garmin.get_activities_by_date(start, end, activity_type)
+        ##Sort into chronological order
+        activities.sort(key = lambda activity : datetime.strptime(activity["startTimeLocal"], "%Y-%m-%d %H:%M:%S"))
+        return activities 
 
     def get_csv_data(self, activity_id : str):
         """Gets the csv data for an activity from Garmin Connect API
@@ -86,13 +105,16 @@ class API():
 if __name__ == "__main__":
     api = API()
     api.setup("euanoturner@gmail.com", "C@nbera1")
-    activities = api.garmin.get_activities_by_date('2022-05-02', '2022-05-02', 'running')
+    #activities = api.garmin.get_activities_by_date('2022-05-02', '2022-05-02', 'running')
+    start = datetime.strptime('2022-05-01', "%Y-%m-%d")
+    end = datetime.strptime('2022-05-07', "%Y-%m-%d")
+    activities = api.get_activities_by_date(start, end)
     for activity in activities:
-        activity_id = activity["activityId"]
-        tcx = api.get_tcx_data(activity_id)
-        api.save_data(tcx, activity_id, 'tcx')
-        gpx = api.get_gpx_data(activity_id)
-        api.save_data(gpx, activity_id, 'gpx')
-        csv = api.get_csv_data(activity_id)
-        api.save_data(csv, activity_id, 'csv')
+        print(activity["startTimeLocal"])
+        # tcx = api.get_tcx_data(activity_id)
+        # api.save_data(tcx, activity_id, 'tcx')
+        # gpx = api.get_gpx_data(activity_id)
+        # api.save_data(gpx, activity_id, 'gpx')
+        # csv = api.get_csv_data(activity_id)
+        # api.save_data(csv, activity_id, 'csv')
 
