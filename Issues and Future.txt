@@ -6,6 +6,6 @@ WeeklyActivitySummaryWidget currently makes a call for each individual gpx and c
 Better would be to make on API call for the week to retrieve all the activities. They can then be sorted into sublists for each day, with sublists being passed to WeeklyViewWidget.
 
 Future:
-Fix issue with excessive API calls
-Add Categoris and Totals widget to WeeklyViewWidget
+Fix issue with excessive API calls - Would still need individual calls for gpx and csv files, so changes would only reduce by 4-5 calls to get activity ids, putting fix on hold
+Add Categories and Totals widget to WeeklyViewWidget
 Add ActivityViewWidget using MapWidget
