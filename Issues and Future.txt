@@ -7,5 +7,5 @@ Better would be to make on API call for the week to retrieve all the activities.
 
 Future:
 Fix issue with excessive API calls
-Add Totals widget to WeeklyViewWidget
+Add Categoris and Totals widget to WeeklyViewWidget
 Add ActivityViewWidget using MapWidget
