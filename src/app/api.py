@@ -42,6 +42,7 @@ class API():
         activities = self.garmin.get_activities_by_date(start, end, activity_type)
         ##Sort into chronological order
         activities.sort(key = lambda activity : datetime.strptime(activity["startTimeLocal"], "%Y-%m-%d %H:%M:%S"))
+        
         return activities 
 
     def get_csv_data(self, activity_id : str):
