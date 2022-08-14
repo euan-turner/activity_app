@@ -1,0 +1,11 @@
+14/08/2022:
+
+Issues:
+Current WeeklyViewWidget and WeeklyActivitySummaryWidget implementations use an excessive amount of API calls, making the window load too slowly.
+WeeklyActivitySummaryWidget currently makes a call for each individual gpx and csv file, for each activity, for each day.
+Better would be to make on API call for the week to retrieve all the activities. They can then be sorted into sublists for each day, with sublists being passed to WeeklyViewWidget.
+
+Future:
+Fix issue with excessive API calls
+Add Totals widget to WeeklyViewWidget
+Add ActivityViewWidget using MapWidget
