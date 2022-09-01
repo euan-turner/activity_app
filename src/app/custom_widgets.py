@@ -105,7 +105,7 @@ class WeeklyActivitySummaryWidget(QWidget):
 
             ##Add index label for user
             index = activities.index(act) + 1
-            self.add_label(frame, f"{index} of {self.num_frames}")
+            self.add_label(frame, f"{index} of {self.num_frames}", italic = True)
 
             ##Add layout to widget then stack
             frame_widget = QWidget()
@@ -120,7 +120,7 @@ class WeeklyActivitySummaryWidget(QWidget):
 
 
         
-    def add_label(self, frame : QVBoxLayout, text : str):
+    def add_label(self, frame : QVBoxLayout, text : str, italic : bool = False):
         """Adds a label to a specified layout frame
 
         Args:
@@ -131,7 +131,8 @@ class WeeklyActivitySummaryWidget(QWidget):
         label = QLabel()
         label.setText(text)
         font = label.font()
-        font.setPointSize(8)
+        font.setPointSize(12)
+        font.setItalic(italic)
         label.setFont(font)
         label.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
         frame.addWidget(label)
