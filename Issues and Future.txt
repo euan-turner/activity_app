@@ -7,5 +7,8 @@ Better would be to make on API call for the week to retrieve all the activities.
 
 Future:
 Fix issue with excessive API calls - Would still need individual calls for gpx and csv files, so changes would only reduce by 4-5 calls to get activity ids, putting fix on hold
-Add Categories and Totals widget to WeeklyViewWidget
+Should time api calls to see how necessary
+Change may still be necessary to make it easier to do totals
+Add Categories and Totals widget to WeeklyViewWidget, categories would be easier by parameterising csv categoires
+Add context menu to WeeklyActivitySummaryWidget about right clicking through, or left clicking to select
 Add ActivityViewWidget using MapWidget
