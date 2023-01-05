@@ -4,6 +4,7 @@ from garminconnect import (
     GarminConnectAuthenticationError,
     GarminConnectTooManyRequestsError,
 )
+from io import BytesIO
 from datetime import datetime
 
 class API():
@@ -71,7 +72,7 @@ class API():
         if as_string:
             return gpx_data.decode(encoding = 'utf-8')
         else:
-            return gpx_data
+            return BytesIO(gpx_data)
 
     def get_tcx_data(self, activity_id : str, as_string : bool = False):
         """Gets the tcx data for an activity from Garmin Connect API
@@ -87,7 +88,7 @@ class API():
         if as_string:
             return tcx_data.decode(encoding = 'utf-8')
         else:
-            return tcx_data
+            return BytesIO(tcx_data)
 
     def save_data(self, data, activity_id : str, suffix : str):  
         """Saves activity data to a file
@@ -110,12 +111,4 @@ if __name__ == "__main__":
     start = datetime.strptime('2022-05-01', "%Y-%m-%d")
     end = datetime.strptime('2022-05-07', "%Y-%m-%d")
     activities = api.get_activities_by_date(start, end)
-    for activity in activities:
-        print(activity["startTimeLocal"])
-        # tcx = api.get_tcx_data(activity_id)
-        # api.save_data(tcx, activity_id, 'tcx')
-        # gpx = api.get_gpx_data(activity_id)
-        # api.save_data(gpx, activity_id, 'gpx')
-        # csv = api.get_csv_data(activity_id)
-        # api.save_data(csv, activity_id, 'csv')
-
+ 

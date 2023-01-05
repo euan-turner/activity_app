@@ -1,56 +1,19 @@
-import sys, pandas as pd
-import xml.etree.ElementTree as ET
-from io import BytesIO
-from gpxplotter import read_gpx_file, create_folium_map, add_segment_to_map
-from datetime import datetime, timedelta
-from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QStackedLayout, QMainWindow, QApplication
-from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtCore import Qt
+import sys, os 
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+from datetime import datetime
+from io import BytesIO 
+from pandas import read_csv
+from PyQt6.QtCore import Qt 
 from PyQt6.QtGui import QMouseEvent
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QStackedLayout, QLabel
+from xml.etree.ElementTree import parse
 
 from api import API
 
-
-class MapWidget(QWidget):
-    """
-    Loads a folium map of gpx file onto a widget
-    """    
-    def __init__(self, gpx_data : BytesIO):
-        """Creates map widget from gpx
-
-        Args:
-            gpx_data (BytesIO): In memory gpx file for activity
-        """        
-        super().__init__()
-
-        ##Default layout
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-
-        ##Line properties - make customisable in future
-        line_options = {
-            'color' : 'red',
-            'weight' : 5,
-            'opacity' : 0.5,
-        }
-
-        ##Create folium map with gpxplotter
-        route_map = create_folium_map(tiles = "stamenterrain")
-        for track in read_gpx_file(gpx_data):
-            print(track)
-            for _, segment in enumerate(track['segments']):
-                add_segment_to_map(route_map, segment, line_options = line_options)
-        
-        ##Save map to bytes
-        data = BytesIO()
-        route_map.save(data, close_file = False)
-
-        ##Load map onto widget
-        webView = QWebEngineView()
-        webView.setHtml(data.getvalue().decode())
-        layout.addWidget(webView)
-
-class WeeklyActivitySummaryWidget(QWidget):
+class ActivitySummaryWidget(QWidget):
     """
     Individual widget used for each activity
     Days with multiple activities can be formed with a stack
@@ -144,7 +107,7 @@ class WeeklyActivitySummaryWidget(QWidget):
             frame (QVBoxLayout): Frame to add location label to
             gpx_data (BytesIO): In memory gpx file for activity
         """    
-        tree = ET.parse(gpx_data)
+        tree = parse(gpx_data)
         root = tree.getroot()
 
         namespace = {"gpx" : "http://www.topografix.com/GPX/1/1"}
@@ -159,7 +122,7 @@ class WeeklyActivitySummaryWidget(QWidget):
             frame (QVBoxLayout): Frame to add labels to
             csv_data (BytesIO): In memory csv file for activity
         """        
-        act_data = pd.read_csv(csv_data)
+        act_data = read_csv(csv_data)
         summary = act_data.tail(1)
 
         for cat in self.csv_categories:
@@ -184,92 +147,3 @@ class WeeklyActivitySummaryWidget(QWidget):
         ##User wants to select activity
         elif e.button() == Qt.MouseButton.LeftButton:
             pass
-
-class WeeklyViewWidget(QWidget):
-
-    def __init__(self, api : API, start_date : datetime, end_date : datetime):
-        """Creates a summary of all activities from the week
-        End date is exclusive (i.e. Monday to Monday)
-
-        Args:
-            api (API): Garmin API instance
-            start_date (datetime): Start date
-            end_date (datetime): End date
-        """        
-
-        super().__init__()
-
-        self.api = api
-        self.start = start_date
-        self.end = end_date
-
-        ##Arrange widgets horizontally
-        self.layout = QHBoxLayout()
-        self.setLayout(self.layout)
-        self.layout.setContentsMargins(5,5,5,5)
-        self.layout.setSpacing(5)
-
-        ##Iterate over days in the week
-        for date in self.week_dates():
-            self.layout.addWidget(WeeklyActivitySummaryWidget(api, date))
-    
-    def week_dates(self):
-        """Generator creating dates for the days in the given week
-
-        Yields:
-            datetime: Dates of days
-        """        
-        for n in range(int((self.end - self.start).days)):
-            yield self.start + timedelta(n)
-
-
-'''
-For single activity view:
-Have a map widget
-Have an info widget with distance, time, elevation, pace, hr, cadence
-Have a widget with lap times
-Info widget shows info for whole activity, or for selected lap
-'''
-
-'''
-For weekly activity view
-Arrange WeeklyActivitySummary widgets horizontally
-For days with multiple activities, put activities in a stack
-'''
-
-
-
-
-
-class TestMainWindow(QMainWindow):
-
-    def __init__(self):
-        super().__init__()
-
-        ##Default layout
-        layout = QVBoxLayout()
-        layout.setContentsMargins(5,5,5,5)
-
-        ##Get data
-        api = API()
-        api.setup("euanoturner@gmail.com", "C@nbera1")
-
-        start = datetime.strptime("2022-05-01", "%Y-%m-%d")
-        end = start + timedelta(weeks = 1)
-
-        widg = WeeklyViewWidget(api, start, end)
-
-        layout.addWidget(widg)
-
-        ##Adding to centre
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
-
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = TestMainWindow()
-    window.show()
-    app.exec()
